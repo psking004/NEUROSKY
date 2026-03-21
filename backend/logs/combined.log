@@ -1,0 +1,45 @@
+{"level":"info","message":"Initializing Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T10:11:09.949Z"}
+{"level":"info","message":"🚀 Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T10:11:09.956Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"error","message":"Database connection failed","service":"neurosky-backend","timestamp":"2026-03-20T10:11:39.951Z"}
+{"level":"info","message":"Initializing Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T10:17:11.549Z"}
+{"level":"info","message":"🚀 Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T10:17:11.555Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"error","message":"Database connection failed","service":"neurosky-backend","timestamp":"2026-03-20T10:17:41.547Z"}
+{"level":"info","message":"Initializing Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T10:24:22.736Z"}
+{"level":"info","message":"🚀 NeuroSky Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T10:24:22.743Z"}
+{"level":"info","message":"💡 Standalone Mock Login enabled: Send any request to /api/auth/login if DB is down","service":"neurosky-backend","timestamp":"2026-03-20T10:24:22.743Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"warn","message":"⚠️ MongoDB connection unavailable. Proceeding in In-Memory Mode.","service":"neurosky-backend","timestamp":"2026-03-20T10:24:27.738Z"}
+{"level":"info","message":"Secure client connected","service":"neurosky-backend","timestamp":"2026-03-20T10:24:30.709Z","uid":"dev_user"}
+{"level":"info","message":"Initializing Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T10:34:13.381Z"}
+{"level":"info","message":"🚀 NeuroSky Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T10:34:13.388Z"}
+{"level":"info","message":"💡 Standalone Mock Login enabled: Send any request to /api/auth/login if DB is down","service":"neurosky-backend","timestamp":"2026-03-20T10:34:13.388Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"warn","message":"⚠️ MongoDB connection unavailable. Proceeding in In-Memory Mode.","service":"neurosky-backend","timestamp":"2026-03-20T10:34:18.375Z"}
+{"level":"info","message":"Initializing Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T10:37:28.816Z"}
+{"level":"info","message":"🚀 NeuroSky Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T10:37:28.822Z"}
+{"level":"info","message":"💡 Standalone Mock Login enabled: Send any request to /api/auth/login if DB is down","service":"neurosky-backend","timestamp":"2026-03-20T10:37:28.823Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"warn","message":"⚠️ MongoDB connection unavailable. Proceeding in In-Memory Mode.","service":"neurosky-backend","timestamp":"2026-03-20T10:37:33.822Z"}
+{"level":"info","message":"Initializing Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T10:49:43.746Z"}
+{"level":"info","message":"🚀 NeuroSky Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T10:49:43.753Z"}
+{"level":"info","message":"💡 Standalone Mock Login enabled: Send any request to /api/auth/login if DB is down","service":"neurosky-backend","timestamp":"2026-03-20T10:49:43.754Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"warn","message":"⚠️ MongoDB connection unavailable. Proceeding in In-Memory Mode.","service":"neurosky-backend","timestamp":"2026-03-20T10:49:48.757Z"}
+{"level":"info","message":"Initializing Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T10:57:45.770Z"}
+{"level":"info","message":"🚀 NeuroSky Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T10:57:45.779Z"}
+{"level":"info","message":"💡 Standalone Mock Login enabled: Send any request to /api/auth/login if DB is down","service":"neurosky-backend","timestamp":"2026-03-20T10:57:45.779Z"}
+{"level":"info","message":"Operator connection secured","service":"neurosky-backend","timestamp":"2026-03-20T10:57:50.305Z","uid":"dev_user"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"warn","message":"⚠️ MongoDB connection unavailable. Proceeding in In-Memory Mode.","service":"neurosky-backend","timestamp":"2026-03-20T10:57:50.765Z"}
+{"level":"info","message":"Initializing Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T11:15:44.365Z"}
+{"level":"info","message":"🚀 NeuroSky Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T11:15:44.372Z"}
+{"level":"info","message":"💡 Standalone Mock Login enabled: Send any request to /api/auth/login if DB is down","service":"neurosky-backend","timestamp":"2026-03-20T11:15:44.372Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"warn","message":"⚠️ MongoDB connection unavailable. Proceeding in In-Memory Mode.","service":"neurosky-backend","timestamp":"2026-03-20T11:15:49.364Z"}
+{"level":"info","message":"Operator connection secured","service":"neurosky-backend","timestamp":"2026-03-20T11:15:51.761Z","uid":"dev_user"}
+{"level":"info","message":"Initializing Secure Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T11:29:08.295Z"}
+{"level":"info","message":"🚀 NeuroSky Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T11:29:08.302Z"}
+{"level":"info","message":"💡 Standalone Mock Login enabled: Send any request to /api/auth/login if DB is down","service":"neurosky-backend","timestamp":"2026-03-20T11:29:08.302Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"warn","message":"⚠️ MongoDB connection unavailable. Proceeding in In-Memory Mode.","service":"neurosky-backend","timestamp":"2026-03-20T11:29:13.303Z"}
+{"level":"info","message":"Operator uplink secured","service":"neurosky-backend","timestamp":"2026-03-20T11:29:31.993Z","uid":"dev_user"}
+{"level":"info","message":"Drone deployed successfully","name":"sky1","service":"neurosky-backend","timestamp":"2026-03-20T11:30:09.721Z"}
+{"level":"info","message":"Initializing Secure Drone Simulation Engine","service":"neurosky-backend","timestamp":"2026-03-20T11:36:20.980Z"}
+{"level":"info","message":"🚀 NeuroSky Service listening on port 3001 [ENV: development]","service":"neurosky-backend","timestamp":"2026-03-20T11:36:20.987Z"}
+{"level":"info","message":"💡 Standalone Mock Login enabled: Send any request to /api/auth/login if DB is down","service":"neurosky-backend","timestamp":"2026-03-20T11:36:20.987Z"}
+{"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","level":"warn","message":"⚠️ MongoDB connection unavailable. Proceeding in In-Memory Mode.","service":"neurosky-backend","timestamp":"2026-03-20T11:36:25.984Z"}
+{"level":"info","message":"Operator uplink secured","service":"neurosky-backend","timestamp":"2026-03-20T11:36:50.114Z","uid":"dev_user"}
+{"level":"info","message":"Operator disconnected","reason":"transport close","service":"neurosky-backend","timestamp":"2026-03-20T11:38:09.373Z","uid":"dev_user"}

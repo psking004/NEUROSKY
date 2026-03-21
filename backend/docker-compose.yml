@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: neurosky-db
+    environment:
+      POSTGRES_USER: neurosky_user
+      POSTGRES_PASSWORD: neurosky_password
+      POSTGRES_DB: neurosky_utm
+    ports: ["5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+
+  redis:
+    image: redis:7-alpine
+    container_name: neurosky-redis
+    ports: ["6379:6379"]
+
+  # PHASE 7 — HORIZONTAL SCALING (BACKEND CLUSTER)
+  backend-1:
+    build: .
+    environment:
+      - DATABASE_URL=postgres://neurosky_user:neurosky_password@postgres:5432/neurosky_utm
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+    depends_on: [postgres, redis]
+  
+  backend-2:
+    build: .
+    environment:
+      - DATABASE_URL=postgres://neurosky_user:neurosky_password@postgres:5432/neurosky_utm
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+    depends_on: [postgres, redis]
+
+  nginx:
+    image: nginx:alpine
+    container_name: neurosky-lb
+    ports: ["80:80"]
+    volumes: ["./nginx.conf:/etc/nginx/nginx.conf:ro"]
+    depends_on: [backend-1, backend-2]
+
+volumes:
+  postgres_data:
