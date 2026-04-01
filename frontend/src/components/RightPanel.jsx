@@ -1,103 +1,199 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const RightPanel = ({ isOpen, onClose, selectedDrone, onToggleMode }) => {
-  if (!isOpen) return null;
+export default function RightPanel({ selectedDrone, onSetDestination, onCommand, onSpeedChange, onEmergencyStop, onExport }) {
+  const [targetLat, setTargetLat] = useState('');
+  const [targetLon, setTargetLon] = useState('');
+  const [mode, setMode] = useState('AUTONOMOUS');
+  const [speed, setSpeed] = useState(0);
+
+  useEffect(() => {
+    if (selectedDrone && selectedDrone.telemetry) {
+      // Initialize target fields with current if empty or when jumping drones
+      // setTargetLat(selectedDrone.telemetry.lat || '');
+      // setTargetLon(selectedDrone.telemetry.lon || '');
+    }
+  }, [selectedDrone]);
+
+  if (!selectedDrone) {
+    return (
+      <section className="fixed right-0 top-16 w-[360px] h-[calc(100vh-64px)] z-50 bg-[#1E293B]/90 backdrop-blur-md border-l border-slate-700/50 flex flex-col p-6 overflow-y-auto items-center justify-center">
+        <h2 className="text-sm font-bold text-slate-500">Select a Drone</h2>
+      </section>
+    );
+  }
+
+  const handleSetTarget = () => {
+    const lat = parseFloat(targetLat);
+    const lon = parseFloat(targetLon);
+    if (!isNaN(lat) && !isNaN(lon)) {
+      onSetDestination(selectedDrone.id, lat, lon);
+    }
+  };
+
+  const handleSpeedChange = (e) => {
+    const newSpeed = Number(e.target.value);
+    setSpeed(newSpeed);
+    if (onSpeedChange) onSpeedChange(selectedDrone.id, newSpeed);
+  };
+
+  const altitude = selectedDrone.telemetry?.altitude?.toFixed(2) ?? '0.00';
+  const heading = selectedDrone.telemetry?.heading?.toFixed(2) ?? '0.00';
+  const lat = selectedDrone.position?.[0]?.toFixed(4) ?? '0.0000';
+  const lon = selectedDrone.position?.[1]?.toFixed(4) ?? '0.0000';
+  const vel = selectedDrone.telemetry?.velocity?.toFixed(1) ?? '0.0';
+  const status = selectedDrone.status || 'UNKNOWN';
+
+  let statusColor = 'text-slate-400 border-slate-700/50 bg-slate-800/50';
+  if (status === 'WARNING') statusColor = 'text-error border-error/50 bg-error-container';
+  else if (status === 'MOVING') statusColor = 'text-emerald-400 border-emerald-500/50 bg-emerald-900/20';
+  else if (status === 'MANUAL') statusColor = 'text-sky-400 border-sky-500/50 bg-sky-900/20';
+  else if (status === 'STOPPED') statusColor = 'text-amber-400 border-amber-500/50 bg-amber-900/20';
 
   return (
-    <div className={`absolute right-0 top-0 bottom-0 w-[420px] glass-panel border-l border-white/20 shadow-2xl z-30 flex flex-col pt-16 transition-all duration-300 transform translate-x-0`}>
-      <div className="p-8 pb-4 flex-1 h-full overflow-y-auto custom-scrollbar">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-black tracking-tight text-slate-900">Telemetry Analysis</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-200/50 rounded-full transition-colors flex items-center justify-center">
-            <span className="material-symbols-outlined text-sm">close</span>
-          </button>
-        </div>
-        
-        <div className="flex items-center gap-4 p-4 bg-white/40 rounded-2xl border border-white/60 mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center text-white shadow-lg">
-            <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
-          </div>
-          <div className="overflow-hidden">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold text-slate-900 overflow-hidden text-ellipsis whitespace-nowrap w-40">
-                {selectedDrone?.id || 'NX-802 Vanguard'}
-              </h3>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                selectedDrone?.mode === 'MANUAL' ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'
-              }`}>
-                {selectedDrone?.mode || 'STABLE'}
-              </span>
-            </div>
-            <p className="mono-data text-xs text-slate-500 overflow-hidden text-ellipsis whitespace-nowrap italic">DR-IDENT: {selectedDrone?.id || 'DR-9921-X1A'}</p>
-          </div>
-        </div>
+    <section className="fixed right-0 top-16 w-[360px] h-[calc(100vh-64px)] z-50 bg-[#1E293B]/90 backdrop-blur-md border-l border-slate-700/50 flex flex-col p-6 overflow-y-auto">
+      <h2 className="text-xs font-black uppercase tracking-[0.2em] text-outline-variant mb-4">Telemetry & Control - {selectedDrone.name || selectedDrone.id}</h2>
 
+      <div className={`mb-6 p-3 rounded-lg border ${statusColor} flex justify-between items-center`}>
+        <div className="text-[10px] font-bold uppercase tracking-widest opacity-80">System Status</div>
+        <div className="font-mono font-black tracking-widest text-sm flex items-center gap-2">
+           {status === 'WARNING' && <span className="material-symbols-outlined text-sm animate-pulse">warning</span>}
+           {status}
+        </div>
+      </div>
+
+      <div className="space-y-4 mb-8">
         <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 text-left hover:scale-[1.02] transition-transform">
-            <span className="material-symbols-outlined text-sky-600 mb-2 text-sm">speed</span>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Airspeed</p>
-            <p className="mono-data text-xl font-black text-slate-900">42 <span className="text-xs font-medium text-slate-400">kts</span></p>
+          <div className="bg-surface-container-lowest/50 p-3 rounded border border-outline-variant/10">
+            <div className="text-[9px] uppercase font-bold text-slate-500 mb-1">LATITUDE</div>
+            <div className="font-mono text-primary text-sm font-bold tracking-widest">{lat}° N</div>
           </div>
-          <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 text-left hover:scale-[1.02] transition-transform">
-            <span className="material-symbols-outlined text-secondary mb-2 text-sm">navigation</span>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Heading</p>
-            <p className="mono-data text-xl font-black text-slate-900">{Math.round(selectedDrone?.heading || 0)}° <span className="text-xs font-medium text-slate-400">S</span></p>
+          <div className="bg-surface-container-lowest/50 p-3 rounded border border-outline-variant/10">
+            <div className="text-[9px] uppercase font-bold text-slate-500 mb-1">LONGITUDE</div>
+            <div className="font-mono text-primary text-sm font-bold tracking-widest">{lon}° W</div>
           </div>
-          <div className="col-span-2 p-4 bg-white rounded-2xl shadow-sm border border-slate-100 text-left hover:scale-[1.02] transition-transform">
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-emerald-600 text-sm">battery_charging_80</span>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Battery Status</p>
-              </div>
-              <p className="mono-data text-sm font-bold text-emerald-600">{selectedDrone?.battery || 88}%</p>
-            </div>
-            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-              <div 
-                className="bg-emerald-500 h-full rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
-                style={{ width: `${selectedDrone?.battery || 88}%` }}
-              ></div>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-2 italic px-1">Remaining operational time: <span className="font-bold">24m 12s</span></p>
+          <div className="bg-surface-container-lowest/50 p-3 rounded border border-outline-variant/10">
+            <div className="text-[9px] uppercase font-bold text-slate-500 mb-1">ALTITUDE</div>
+            <div className="font-mono text-primary text-sm font-bold tracking-widest">{altitude} m</div>
+          </div>
+          <div className="bg-surface-container-lowest/50 p-3 rounded border border-outline-variant/10">
+            <div className="text-[9px] uppercase font-bold text-slate-500 mb-1">HEADING</div>
+            <div className="font-mono text-primary text-sm font-bold tracking-widest">{heading}°</div>
           </div>
         </div>
 
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Live Telemetry Stream</h4>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div className="bg-surface-container-lowest/50 p-3 rounded border border-outline-variant/10 flex items-center justify-between">
+          <div>
+            <div className="text-[9px] uppercase font-bold text-slate-500 mb-1">SPEED (m/s)</div>
+            <div className="font-mono text-emerald-400 text-lg font-bold tracking-widest">{vel} m/s</div>
           </div>
-          <div className="space-y-2 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
-            <div className="flex gap-4 p-2 bg-slate-50 rounded-lg border border-slate-100 text-left text-[10px] font-medium font-mono group">
-              <span className="text-sky-600 font-bold whitespace-nowrap">12:44:02</span>
-              <span className="text-slate-600 uppercase group-hover:text-primary transition-colors">POS_UPDATE: {selectedDrone?.lat?.toFixed(4)}, {selectedDrone?.lng?.toFixed(4)}</span>
-            </div>
-            <div className="flex gap-4 p-2 bg-slate-50 rounded-lg border border-slate-100 text-left text-[10px] font-medium font-mono group">
-              <span className="text-sky-600 font-bold whitespace-nowrap">12:43:58</span>
-              <span className="text-slate-600 uppercase group-hover:text-primary transition-colors">ALT_CORRECT: {selectedDrone?.alt}m adjustment</span>
-            </div>
+          <div className="w-16 h-8 bg-surface-container flex items-center justify-center rounded">
+            <span className="material-symbols-outlined text-emerald-500">speed</span>
           </div>
         </div>
       </div>
-      
-      <div className="p-8 pt-4 bg-slate-50/50 border-t border-slate-100">
-        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 mb-3 block">Navigation Override</label>
-        <div className="flex gap-3">
+
+      {/* Mode Toggle */}
+      <div className="mb-8">
+        <div className="flex bg-surface-container-lowest p-1 rounded-lg border border-outline-variant/20">
           <button 
-            onClick={() => onToggleMode(selectedDrone?.id)}
-            className={`flex-1 ${
-              selectedDrone?.mode === 'MANUAL' ? 'bg-amber-500 text-white' : 'bg-slate-900 text-white'
-            } py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] shadow-lg active:scale-95 transition-all`}
+            onClick={() => setMode('AUTONOMOUS')}
+            className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${mode === 'AUTONOMOUS' ? 'bg-primary text-on-primary' : 'text-slate-400 hover:text-white'}`}
           >
-            <span className="material-symbols-outlined text-sm">{selectedDrone?.mode === 'MANUAL' ? 'pan_tool_alt' : 'settings_remote'}</span>
-            {selectedDrone?.mode === 'MANUAL' ? 'MANUAL CONTROL' : 'SWITCH TO MANUAL'}
+            AUTONOMOUS
           </button>
-          <button className="p-4 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center shadow-lg active:scale-95 border border-rose-100">
-            <span className="material-symbols-outlined text-sm">warning</span>
+          <button 
+            onClick={() => setMode('MANUAL')}
+            className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${mode === 'MANUAL' ? 'bg-primary text-on-primary' : 'text-slate-400 hover:text-white'}`}
+          >
+            MANUAL
           </button>
         </div>
       </div>
-    </div>
-  );
-};
 
-export default RightPanel;
+      {/* Autonomous UI */}
+      {mode === 'AUTONOMOUS' && (
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Navigation Target</div>
+            <div className="flex flex-col gap-2">
+              <input 
+                className="bg-surface-container-lowest border border-outline-variant/30 rounded px-3 py-2 text-sm font-mono text-primary focus:ring-1 focus:ring-primary focus:outline-none placeholder-slate-600" 
+                placeholder="Target Latitude" 
+                type="number"
+                step="any"
+                value={targetLat}
+                onChange={e => setTargetLat(e.target.value)}
+              />
+              <input 
+                className="bg-surface-container-lowest border border-outline-variant/30 rounded px-3 py-2 text-sm font-mono text-primary focus:ring-1 focus:ring-primary focus:outline-none placeholder-slate-600" 
+                placeholder="Target Longitude" 
+                type="number"
+                step="any"
+                value={targetLon}
+                onChange={e => setTargetLon(e.target.value)}
+              />
+            </div>
+            <button 
+              onClick={handleSetTarget}
+              className="w-full py-3 bg-primary-container text-on-primary-container font-black text-xs uppercase tracking-widest rounded hover:opacity-90 transition-opacity"
+            >
+              Set Target Destination
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Manual UI */}
+      {mode === 'MANUAL' && (
+        <div className="space-y-4">
+          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Manual D-Pad Override</div>
+          
+          <div className="grid grid-cols-3 gap-2 w-48 mx-auto">
+            <div></div>
+            <button onClick={() => onCommand(selectedDrone.id, 'move', { direction: 'up' })} className="w-14 h-14 bg-surface-container border border-outline-variant/30 flex items-center justify-center rounded hover:bg-surface-container-high transition-colors">
+              <span className="material-symbols-outlined">keyboard_arrow_up</span>
+            </button>
+            <div></div>
+            <button onClick={() => onCommand(selectedDrone.id, 'move', { direction: 'left' })} className="w-14 h-14 bg-surface-container border border-outline-variant/30 flex items-center justify-center rounded hover:bg-surface-container-high transition-colors">
+              <span className="material-symbols-outlined">keyboard_arrow_left</span>
+            </button>
+            <button onClick={() => onEmergencyStop()} className="w-14 h-14 bg-error-container border border-error/30 flex items-center justify-center rounded hover:bg-error transition-colors text-error hover:text-on-error">
+              <span className="material-symbols-outlined">stop_circle</span>
+            </button>
+            <button onClick={() => onCommand(selectedDrone.id, 'move', { direction: 'right' })} className="w-14 h-14 bg-surface-container border border-outline-variant/30 flex items-center justify-center rounded hover:bg-surface-container-high transition-colors">
+              <span className="material-symbols-outlined">keyboard_arrow_right</span>
+            </button>
+            <div></div>
+            <button onClick={() => onCommand(selectedDrone.id, 'move', { direction: 'down' })} className="w-14 h-14 bg-surface-container border border-outline-variant/30 flex items-center justify-center rounded hover:bg-surface-container-high transition-colors">
+              <span className="material-symbols-outlined">keyboard_arrow_down</span>
+            </button>
+            <div></div>
+          </div>
+
+          <div className="space-y-2 mt-6">
+            <div className="flex justify-between text-[10px] font-mono">
+              <span>SPEED OVERRIDE</span>
+              <span className="text-primary">{speed} m/s</span>
+            </div>
+            <input 
+              className="w-full accent-primary h-1 bg-surface-container-highest rounded-lg appearance-none cursor-pointer" 
+              type="range"
+              min="0"
+              max="50"
+              value={speed}
+              onChange={handleSpeedChange}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Action */}
+      <div className="mt-auto pt-8">
+        <button onClick={onExport} className="w-full py-4 border border-outline-variant/30 text-slate-400 hover:text-white hover:border-primary transition-all rounded-lg flex items-center justify-center gap-2 text-sm font-bold">
+          <span className="material-symbols-outlined shrink-0">download</span>
+          Export Telemetry Log
+        </button>
+      </div>
+    </section>
+  );
+}

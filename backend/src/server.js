@@ -7,7 +7,19 @@ import fastifySocketIo from 'fastify-socket.io';
 import { env } from './config/env.js';
 import { tokenBucketRateLimit } from './middleware/rate-limiter.js';
 import * as authService from './services/auth-drone.service.js';
-import { setupTelemetry } from './socket/telemetry.js';
+import { DroneSimulationService, DroneMode } from './services/droneService.js';
+import { CollisionDetectionService } from './services/collisionService.js';
+import { z } from 'zod';
+
+// Global Crash Prevention: Catch all unhandled rejections and exceptions
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💣 [CRITICAL ERROR]: UNHANDLED REJECTION', { reason, promise });
+});
+
+process.on('uncaughtException', (err, origin) => {
+  console.error('🧨 [CRITICAL ERROR]: UNCAUGHT EXCEPTION', { error: err.message, origin });
+});
+
 
 const fastify = Fastify({
   logger: {
@@ -47,11 +59,123 @@ fastify.register(fastifySocketIo, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
 });
 
-// Telemetry Core Initialization
+// --- Validation Schemas ---
+const ControlSchema = z.object({
+  droneId: z.string().uuid(),
+  command: z.object({
+    mode: z.nativeEnum(DroneMode).optional(),
+    action: z.enum(['move', 'stop']).optional(),
+    direction: z.enum(['up', 'down', 'left', 'right']).optional(),
+    speed: z.number().min(0).max(50).optional(),
+    target: z.object({
+      latitude: z.number().min(-90).max(90),
+      longitude: z.number().min(-180).max(180)
+    }).optional()
+  })
+});
+
+const AddDroneSchema = z.object({
+  name: z.string().min(1).max(20),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  speed: z.number().min(0).max(50)
+});
+
+const TargetSchema = z.object({
+  droneId: z.string().uuid(),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180)
+});
+
+// --- Drone Simulation Core ---
 fastify.ready((err) => {
   if (err) throw err;
-  setupTelemetry(fastify);
-  fastify.log.info('🛡️ NeuroSky Secure Telemetry Radar Active');
+
+  const io = fastify.io;
+  const droneService = new DroneSimulationService(0);
+  const collisionService = new CollisionDetectionService(500, 200);
+
+  fastify.log.info('🛡️ NeuroSky Simulation Engine Active');
+
+  // Broadcast drone updates every second
+  const broadcastUpdate = () => {
+    try {
+      const drones = droneService.updateAndGetDrones();
+      const alerts = collisionService.checkCollisions(drones);
+
+      io.emit('drones:update', {
+        timestamp: Date.now(),
+        drones: droneService.getDrones()
+      });
+
+      if (alerts.length > 0) {
+        io.emit('collision:alert', { timestamp: Date.now(), alerts });
+      }
+    } catch (error) {
+      fastify.log.error('Tick processing failure: ' + error.message);
+    }
+  };
+
+  const timer = setInterval(broadcastUpdate, 1000);
+
+  // Socket connection handler
+  io.on('connection', (socket) => {
+    fastify.log.info('Operator uplink secured: ' + (socket.id));
+
+    // Initial Sync
+    socket.emit('drones:update', {
+      timestamp: Date.now(),
+      drones: droneService.getDrones()
+    });
+
+    // Deploy drone
+    socket.on('drone:add', (data) => {
+      try {
+        const validated = AddDroneSchema.parse(data);
+        const drone = droneService.addDrone(validated);
+        fastify.log.info('Drone deployed: ' + drone.name);
+        io.emit('drones:update', { timestamp: Date.now(), drones: droneService.getDrones() });
+      } catch (err) {
+        fastify.log.warn('Add drone failed: ' + err.message);
+        socket.emit('error', { message: 'Invalid drone specs' });
+      }
+    });
+
+    // Remove drone
+    socket.on('drone:remove', (data) => {
+      if (data?.droneId) {
+        droneService.removeDrone(data.droneId);
+        io.emit('drones:update', { timestamp: Date.now(), drones: droneService.getDrones() });
+      }
+    });
+
+    // Control drone (manual move/stop, speed, mode)
+    socket.on('drone:control', (data) => {
+      try {
+        const validatedPayload = ControlSchema.parse(data);
+        droneService.controlDrone(validatedPayload.droneId, validatedPayload.command);
+      } catch (err) {
+        fastify.log.warn('Invalid control payload: ' + err.message);
+      }
+    });
+
+    // Set autonomous target
+    socket.on('drone:setTarget', (data) => {
+      try {
+        const { droneId, latitude, longitude } = TargetSchema.parse(data);
+        droneService.controlDrone(droneId, {
+          mode: DroneMode.AUTONOMOUS,
+          target: { latitude, longitude }
+        });
+      } catch (err) {
+        fastify.log.warn('Invalid target location: ' + err.message);
+      }
+    });
+
+    socket.on('disconnect', (reason) => {
+      fastify.log.info('Operator disconnected: ' + reason);
+    });
+  });
 });
 
 // Security Hooks
@@ -113,6 +237,21 @@ fastify.register(async (instance) => {
 
 const start = async () => {
   try {
+    // Graceful Shutdown Handler
+    ['SIGINT', 'SIGTERM'].forEach(signal => {
+      process.on(signal, async () => {
+        fastify.log.info(`Received ${signal}, shutting down gracefully...`);
+        try {
+          await fastify.close();
+          fastify.log.info('Server closed');
+          process.exit(0);
+        } catch (err) {
+          fastify.log.error('Error during shutdown', err);
+          process.exit(1);
+        }
+      });
+    });
+
     await fastify.listen({ port: parseInt(env.PORT, 10), host: '0.0.0.0' });
   } catch (err) {
     fastify.log.error(err);
